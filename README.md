@@ -5,27 +5,26 @@ Taxonomy support for django CMS.
 ## Features
 
 - Manage taxonomies and terms in django CMS
-- REST API support
-- Multi-language support
+- Multi-language support for categories
 - Easy integration with existing CMS
 
 ## Installation
 
 Install using pip:
 
-\`\`\`bash
+```bash
 pip install djangocms-taxonomy
-\`\`\`
+```
 
 Update your \`INSTALLED_APPS\` setting:
 
-\`\`\`python
+```python
 INSTALLED_APPS = [
     ...
-    \"djangocms_taxonomy\",
+    "djangocms_taxonomy",
     ...
 ]
-\`\`\`
+```
 
 ## License
 

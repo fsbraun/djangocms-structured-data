@@ -17,6 +17,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "django-cms>=4.1",
+    "django-cte",
+    "django-parler",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

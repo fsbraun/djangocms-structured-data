@@ -3,101 +3,86 @@ from typing import Optional
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import F, Prefetch, QuerySet
+from django.db.models import F, IntegerField, TextField, Value
+from django.db.models.functions import Concat
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django_cte import CTE, with_cte
+from parler.managers import TranslatableQuerySet
+from parler.models import TranslatableModel, TranslatedFields
 
 
-class CategoryQuerySet(models.QuerySet):
+class CategoryQuerySet(TranslatableQuerySet):
     """
-    Optimized queryset for Category model.
+    Optimized queryset for Category model using CTEs.
+    Inherits from TranslatableQuerySet for parler compatibility.
     """
     
-    def get_descendants(self, category_id: int) -> QuerySet:
+    def with_tree_fields(self) -> models.QuerySet:
         """
-        Get all descendants of a category using Django ORM.
-        Uses prefetch_related for optimization.
+        Annotate queryset with tree hierarchy fields using recursive CTE.
         
-        Args:
-            category_id: The ID of the category to get descendants for.
-            
+        Adds:
+        - path: Full hierarchical path (e.g., "Parent / Child / Grandchild")
+        - depth: Integer depth in the tree (root = 0)
+        
         Returns:
-            QuerySet of descendant categories.
+            QuerySet annotated with path and depth, ordered hierarchically.
         """
-        category = self.filter(id=category_id).first()
-        if not category:
-            return self.none()
+        def make_cte(cte) -> models.QuerySet:
+            # Non-recursive: get root nodes
+            return self.model.objects.filter(
+                parent__isnull=True
+            ).order_by().values(  # Clear default ordering for UNION
+                "id",
+                "translations__name",
+                "slug",
+                "parent_id",
+                "translations__description",
+                "date_created",
+                "date_modified",
+                path=F("translations__name"),
+                depth=Value(0, output_field=IntegerField()),
+            ).union(
+                # Recursive: get descendants
+                cte.join(
+                    self.model,
+                    parent_id=cte.col.id
+                ).order_by().values(  # Clear default ordering for UNION
+                    "id",
+                    "translations__name",
+                    "slug",
+                    "parent_id",
+                    "translations__description",
+                    "date_created",
+                    "date_modified",
+                    path=Concat(
+                        cte.col.path,
+                        Value("/"),
+                        F("slug"),
+                        output_field=TextField(),
+                    ),
+                    depth=cte.col.depth + Value(1, output_field=IntegerField()),
+                ),
+                all=True,
+            )
         
-        # Get all direct children with recursive expansion
-        descendants: list[Category] = []
-        queue = list(category.children.all())
+        cte = CTE.recursive(make_cte)
         
-        while queue:
-            current = queue.pop(0)
-            descendants.append(current)
-            queue.extend(current.children.all())
-        
-        # Get the IDs and return as queryset
-        if descendants:
-            ids = [d.id for d in descendants]
-            return self.filter(id__in=ids).prefetch_related("children")
-        return self.none()
+        return with_cte(
+            cte,
+            select=cte.join(
+                self.model,
+                id=cte.col.id
+            )
+            .annotate(
+                path=cte.col.path,
+                depth=cte.col.depth,
+            )
+            .order_by("path")
+        )
     
-    def get_descendants_optimized(self, category_id: int) -> QuerySet:
-        """
-        Get all descendants using Django ORM.
-        Alias for get_descendants for compatibility.
-        
-        Args:
-            category_id: The ID of the category to get descendants for.
-            
-        Returns:
-            QuerySet of descendant categories.
-        """
-        return self.get_descendants(category_id)
-    
-    def get_ancestors(self, category_id: int) -> QuerySet:
-        """
-        Get all ancestors of a category using Django ORM.
-        
-        Args:
-            category_id: The ID of the category to get ancestors for.
-            
-        Returns:
-            QuerySet of ancestor categories.
-        """
-        category = self.filter(id=category_id).first()
-        if not category:
-            return self.none()
-        
-        # Traverse up the tree
-        ancestors: list[Category] = []
-        current = category.parent
-        
-        while current is not None:
-            ancestors.append(current)
-            current = current.parent
-        
-        # Get the IDs and return as queryset
-        if ancestors:
-            ids = [a.id for a in ancestors]
-            return self.filter(id__in=ids)
-        return self.none()
-    
-    def get_ancestors_optimized(self, category_id: int) -> QuerySet:
-        """
-        Get all ancestors using Django ORM.
-        Alias for get_ancestors for compatibility.
-        
-        Args:
-            category_id: The ID of the category to get ancestors for.
-            
-        Returns:
-            QuerySet of ancestor categories.
-        """
-        return self.get_ancestors(category_id)
-    
-    def root_categories(self) -> QuerySet:
+    def roots(self) -> "CategoryQuerySet":
         """
         Get all root categories (no parent).
         
@@ -106,7 +91,7 @@ class CategoryQuerySet(models.QuerySet):
         """
         return self.filter(parent__isnull=True)
     
-    def leaf_categories(self) -> QuerySet:
+    def leaves(self) -> "CategoryQuerySet":
         """
         Get all leaf categories (no children).
         
@@ -116,99 +101,19 @@ class CategoryQuerySet(models.QuerySet):
         return self.filter(children__isnull=True)
 
 
-class CategoryManager(models.Manager):
+
+class Category(TranslatableModel):
     """
-    Custom manager for Category model with optimizations.
-    """
+    A hierarchical category model for taxonomy management.
     
-    def get_queryset(self) -> CategoryQuerySet:
-        """
-        Return the custom CategoryQuerySet.
-        
-        Returns:
-            CategoryQuerySet instance.
-        """
-        return CategoryQuerySet(self.model, using=self._db)
-    
-    def get_descendants(self, category_id: int) -> QuerySet:
-        """
-        Get all descendants of a category.
-        
-        Args:
-            category_id: The ID of the category to get descendants for.
-            
-        Returns:
-            QuerySet of descendant categories.
-        """
-        return self.get_queryset().get_descendants(category_id)
-    
-    def get_descendants_optimized(self, category_id: int) -> QuerySet:
-        """
-        Get all descendants using optimized method.
-        
-        Args:
-            category_id: The ID of the category to get descendants for.
-            
-        Returns:
-            QuerySet of descendant categories.
-        """
-        return self.get_queryset().get_descendants_optimized(category_id)
-    
-    def get_ancestors(self, category_id: int) -> QuerySet:
-        """
-        Get all ancestors of a category.
-        
-        Args:
-            category_id: The ID of the category to get ancestors for.
-            
-        Returns:
-            QuerySet of ancestor categories.
-        """
-        return self.get_queryset().get_ancestors(category_id)
-    
-    def get_ancestors_optimized(self, category_id: int) -> QuerySet:
-        """
-        Get all ancestors using optimized method.
-        
-        Args:
-            category_id: The ID of the category to get ancestors for.
-            
-        Returns:
-            QuerySet of ancestor categories.
-        """
-        return self.get_queryset().get_ancestors_optimized(category_id)
-    
-    def root_categories(self) -> QuerySet:
-        """
-        Get all root categories.
-        
-        Returns:
-            QuerySet of root categories.
-        """
-        return self.get_queryset().root_categories()
-    
-    def leaf_categories(self) -> QuerySet:
-        """
-        Get all leaf categories.
-        
-        Returns:
-            QuerySet of leaf categories.
-        """
-        return self.get_queryset().leaf_categories()
-
-
-
-
-class Category(models.Model):
-    """
-    A hierarchical category model that can be attached to any Django model
-    using a GenericForeignKey. Inspired by djangocms-stories.PostCategory.
+    Categories are reusable across different content types and can be
+    attached to any Django model via the CategoryRelation intermediary model.
     
     Features:
     - Hierarchical structure with parent-child relationships
-    - Generic foreign key support for attaching to any model
+    - Reusable across multiple content types
+    - Translatable name and description using django-parler
     - Metadata like creation/modification dates
-    - Customizable priority ordering
     - Optimized tree traversal to minimize database queries
     """
     # Hierarchical structure
@@ -221,43 +126,24 @@ class Category(models.Model):
         on_delete=models.CASCADE,
     )
     
-    # Core fields
-    name = models.CharField(
-        _("name"),
-        max_length=255,
-    )
+    # Non-translatable core field
     slug = models.SlugField(
         _("slug"),
         max_length=255,
         unique=True,
         db_index=True,
     )
-    description = models.TextField(
-        _("description"),
-        blank=True,
-    )
     
-    # Generic foreign key fields
-    content_type = models.ForeignKey(
-        ContentType,
-        on_delete=models.CASCADE,
-        verbose_name=_("content type"),
-        null=True,
-        blank=True,
-    )
-    object_id = models.PositiveIntegerField(
-        _("object id"),
-        null=True,
-        blank=True,
-    )
-    content_object = GenericForeignKey("content_type", "object_id")
-    
-    # Ordering and metadata
-    priority = models.IntegerField(
-        _("priority"),
-        blank=True,
-        null=True,
-        help_text=_("Used for custom ordering of categories"),
+    # Translatable fields
+    translations = TranslatedFields(
+        name=models.CharField(
+            _("name"),
+            max_length=255,
+        ),
+        description=models.TextField(
+            _("description"),
+            blank=True,
+        ),
     )
     
     # Timestamps
@@ -271,43 +157,17 @@ class Category(models.Model):
     )
     
     # Custom manager with optimizations
-    objects = CategoryManager()
+    objects = CategoryQuerySet.as_manager()
     
     class Meta:
         verbose_name = _("category")
         verbose_name_plural = _("categories")
-        ordering = (F("priority").asc(nulls_last=True), "name")
+
         indexes = [
-            models.Index(fields=["content_type", "object_id"]),
             models.Index(fields=["slug"]),
             models.Index(fields=["parent"]),
         ]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["slug", "parent"],
-                name="unique_slug_per_parent",
-            ),
-        ]
     
-    def get_descendants(self) -> QuerySet:
-        """
-        Get all descendants using optimized method.
-        This executes efficient queries instead of N queries.
-        
-        Returns:
-            QuerySet of descendant categories.
-        """
-        return Category.objects.get_descendants_optimized(self.pk)
-    
-    def get_ancestors(self) -> QuerySet:
-        """
-        Get all ancestors using optimized method.
-        This executes efficient queries instead of N queries.
-        
-        Returns:
-            QuerySet of ancestor categories.
-        """
-        return Category.objects.get_ancestors_optimized(self.pk)
     
     def save(self, *args, **kwargs) -> None:
         """
@@ -329,3 +189,63 @@ class Category(models.Model):
             The category name.
         """
         return self.name
+
+
+class CategoryRelation(models.Model):
+    """
+    Intermediary model for generic many-to-many relationships between
+    Category and any Django model.
+    
+    This allows:
+    - Multiple categories to be attached to any object
+    - Categories to be reused across different content types
+    - Efficient querying and filtering
+    """
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        verbose_name=_("category"),
+        related_name="relations",
+    )
+    
+    # Generic foreign key to any model
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        verbose_name=_("content type"),
+    )
+    object_id = models.PositiveIntegerField(
+        _("object id"),
+    )
+    content_object = GenericForeignKey("content_type", "object_id")
+    
+    # Optional ordering within the relationship
+    order = models.IntegerField(
+        _("order"),
+        default=0,
+        help_text=_("Order of this category for the related object"),
+    )
+    
+    class Meta:
+        verbose_name = _("category relation")
+        verbose_name_plural = _("category relations")
+        ordering = ["order", "category__translations__name"]
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+            models.Index(fields=["category", "content_type"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["category", "content_type", "object_id"],
+                name="unique_category_per_object",
+            ),
+        ]
+    
+    def __str__(self) -> str:
+        """
+        Return the string representation of the relation.
+        
+        Returns:
+            A description of the category-object relationship.
+        """
+        return f"{self.category.name} -> {self.content_type.model}"

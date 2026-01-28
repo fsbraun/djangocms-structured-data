@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     "cms",
     "menus",
     "rest_framework",
+    # Django Parler
+    "parler",
     # Local app
     "djangocms_taxonomy",
     "tests.test_app",
@@ -71,6 +73,7 @@ LANGUAGE_CODE = "en-us"
 LANGUAGES = [
     ("en", "English"),
     ("de", "German"),
+    ("fr", "French"),
 ]
 
 TIME_ZONE = "UTC"
@@ -94,4 +97,19 @@ REST_FRAMEWORK = {
 
 # CMS configuration
 CMS_CONFIRM_VERSION4 = True
+
+# Parler configuration
+PARLER_LANGUAGES = {
+    SITE_ID: (
+        {"code": "en"},
+        {"code": "de"},
+        {"code": "fr"},
+    ),
+    "default": {
+        "fallbacks": ["en"],
+        "hide_untranslated": False,
+    },
+}
+
+PARLER_DEFAULT_LANGUAGE_CODE = "en"
 CMS_PERMISSION = True
