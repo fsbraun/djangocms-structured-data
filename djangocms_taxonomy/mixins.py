@@ -84,32 +84,6 @@ class CategoryFormMixin(forms.BaseModelForm):
                 ).values_list("category_id", flat=True)
                 self.fields["categories"].initial = related_categories
 
-    def save(self, commit: bool = True) -> Model:
-        """Save the form and update category relations."""
-        instance = super().save(commit=commit)
-
-        if commit and self.instance.pk:
-            # Get content type for this model
-            content_type = ContentType.objects.get_for_model(instance)
-
-            # Clear existing relations
-            CategoryRelation.objects.filter(
-                content_type=content_type,
-                object_id=instance.pk,
-            ).delete()
-
-            # Create new relations for selected categories
-            categories = self.cleaned_data.get("categories", [])
-            for order, category in enumerate(categories):
-                CategoryRelation.objects.create(
-                    category=category,
-                    content_type=content_type,
-                    object_id=instance.pk,
-                    order=order,
-                )
-
-        return instance
-
 
 class CategoryAdminMixin:
     """
@@ -172,3 +146,32 @@ class CategoryAdminMixin:
         """Get readonly fields, preserving parent class readonly fields."""
         readonly = list(super().get_readonly_fields(request, obj))  # type: ignore
         return readonly
+
+    def save_related(self, request: Any, form: forms.ModelForm, formsets: Any, change: bool) -> None:
+        """Save related objects including category relations."""
+        # Call parent save_related
+        super().save_related(request, form, formsets, change)  # type: ignore
+
+        # Save category relations from the form
+        if form.instance.pk and hasattr(form, "cleaned_data"):
+            content_type = ContentType.objects.get_for_model(form.instance)
+
+            # Clear existing relations
+            CategoryRelation.objects.filter(
+                content_type=content_type,
+                object_id=form.instance.pk,
+            ).delete()
+
+            # Create new relations for selected categories
+            categories = form.cleaned_data.get("categories", [])
+            relations = [
+                CategoryRelation(
+                    category=category,
+                    content_type=content_type,
+                    object_id=form.instance.pk,
+                    order=order,
+                )
+                for order, category in enumerate(categories)
+            ]
+            if relations:
+                CategoryRelation.objects.bulk_create(relations)
