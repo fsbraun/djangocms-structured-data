@@ -21,7 +21,6 @@ INSTALLED_APPS = [
     "treebeard",
     "cms",
     "menus",
-    "rest_framework",
     # Django Parler
     "parler",
     # Local app
@@ -87,12 +86,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Sites framework
 SITE_ID = 1
-
-# REST Framework configuration
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 10,
-}
 
 # CMS configuration
 CMS_CONFIRM_VERSION4 = True
