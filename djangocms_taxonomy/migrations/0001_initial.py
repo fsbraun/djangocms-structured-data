@@ -7,84 +7,124 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name="Category",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('slug', models.SlugField(max_length=255, unique=True, verbose_name='slug')),
-                ('date_created', models.DateTimeField(auto_now_add=True, verbose_name='created at')),
-                ('date_modified', models.DateTimeField(auto_now=True, verbose_name='modified at')),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='djangocms_taxonomy.category', verbose_name='parent')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("slug", models.SlugField(max_length=255, unique=True, verbose_name="slug")),
+                ("date_created", models.DateTimeField(auto_now_add=True, verbose_name="created at")),
+                ("date_modified", models.DateTimeField(auto_now=True, verbose_name="modified at")),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="children",
+                        to="djangocms_taxonomy.category",
+                        verbose_name="parent",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'category',
-                'verbose_name_plural': 'categories',
+                "verbose_name": "category",
+                "verbose_name_plural": "categories",
             },
             bases=(parler.models.TranslatableModelMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='CategoryRelation',
+            name="CategoryRelation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.PositiveIntegerField(verbose_name='object id')),
-                ('order', models.IntegerField(default=0, help_text='Order of this category for the related object', verbose_name='order')),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='relations', to='djangocms_taxonomy.category', verbose_name='category')),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype', verbose_name='content type')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("object_id", models.PositiveIntegerField(verbose_name="object id")),
+                (
+                    "order",
+                    models.IntegerField(
+                        default=0, help_text="Order of this category for the related object", verbose_name="order"
+                    ),
+                ),
+                (
+                    "category",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="relations",
+                        to="djangocms_taxonomy.category",
+                        verbose_name="category",
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                        verbose_name="content type",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'category relation',
-                'verbose_name_plural': 'category relations',
-                'ordering': ['order', 'category__translations__name'],
+                "verbose_name": "category relation",
+                "verbose_name_plural": "category relations",
+                "ordering": ["order", "category__translations__name"],
             },
         ),
         migrations.CreateModel(
-            name='CategoryTranslation',
+            name="CategoryTranslation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('language_code', models.CharField(db_index=True, max_length=15, verbose_name='Language')),
-                ('name', models.CharField(max_length=255, verbose_name='name')),
-                ('description', models.TextField(blank=True, verbose_name='description')),
-                ('master', parler.fields.TranslationsForeignKey(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='translations', to='djangocms_taxonomy.category')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("language_code", models.CharField(db_index=True, max_length=15, verbose_name="Language")),
+                ("name", models.CharField(max_length=255, verbose_name="name")),
+                ("description", models.TextField(blank=True, verbose_name="description")),
+                (
+                    "master",
+                    parler.fields.TranslationsForeignKey(
+                        editable=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="translations",
+                        to="djangocms_taxonomy.category",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'category Translation',
-                'db_table': 'djangocms_taxonomy_category_translation',
-                'db_tablespace': '',
-                'managed': True,
-                'default_permissions': (),
+                "verbose_name": "category Translation",
+                "db_table": "djangocms_taxonomy_category_translation",
+                "db_tablespace": "",
+                "managed": True,
+                "default_permissions": (),
             },
             bases=(parler.models.TranslatedFieldsModelMixin, models.Model),
         ),
         migrations.AddIndex(
-            model_name='category',
-            index=models.Index(fields=['slug'], name='djangocms_t_slug_805423_idx'),
+            model_name="category",
+            index=models.Index(fields=["slug"], name="djangocms_t_slug_805423_idx"),
         ),
         migrations.AddIndex(
-            model_name='category',
-            index=models.Index(fields=['parent'], name='djangocms_t_parent__e0e558_idx'),
+            model_name="category",
+            index=models.Index(fields=["parent"], name="djangocms_t_parent__e0e558_idx"),
         ),
         migrations.AddIndex(
-            model_name='categoryrelation',
-            index=models.Index(fields=['content_type', 'object_id'], name='djangocms_t_content_eeb0c3_idx'),
+            model_name="categoryrelation",
+            index=models.Index(fields=["content_type", "object_id"], name="djangocms_t_content_eeb0c3_idx"),
         ),
         migrations.AddIndex(
-            model_name='categoryrelation',
-            index=models.Index(fields=['category', 'content_type'], name='djangocms_t_categor_8f8545_idx'),
+            model_name="categoryrelation",
+            index=models.Index(fields=["category", "content_type"], name="djangocms_t_categor_8f8545_idx"),
         ),
         migrations.AddConstraint(
-            model_name='categoryrelation',
-            constraint=models.UniqueConstraint(fields=('category', 'content_type', 'object_id'), name='unique_category_per_object'),
+            model_name="categoryrelation",
+            constraint=models.UniqueConstraint(
+                fields=("category", "content_type", "object_id"), name="unique_category_per_object"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='categorytranslation',
-            unique_together={('language_code', 'master')},
+            name="categorytranslation",
+            unique_together={("language_code", "master")},
         ),
     ]

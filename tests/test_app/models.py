@@ -7,9 +7,10 @@ class TestModel(models.Model):
     """
     A test model to verify generic foreign key functionality with Category.
     """
+
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    
+
     # Generic foreign key for testing
     content_type = models.ForeignKey(
         ContentType,
@@ -19,9 +20,9 @@ class TestModel(models.Model):
     )
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey("content_type", "object_id")
-    
+
     class Meta:
         app_label = "test_app"
-    
+
     def __str__(self):
         return self.title

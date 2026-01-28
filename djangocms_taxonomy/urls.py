@@ -1,7 +1,8 @@
-from django.urls import path
+from typing import Any
+
 
 app_name = "djangocms_taxonomy"
 
-urlpatterns = [
+urlpatterns: list[Any] = [
     # Add your URL patterns here
 ]
