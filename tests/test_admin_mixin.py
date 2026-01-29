@@ -156,3 +156,61 @@ class TestCategoryAdminMixin:
         assert qs.count() >= 2
         assert all(hasattr(obj, "depth") for obj in qs)
         assert all(hasattr(obj, "path") for obj in qs)
+
+    def test_mixin_adds_category_list_filter(self) -> None:
+        from tests.test_app.admin import TestModelAdmin
+
+        request = self.factory.get("/admin/")
+        request.user = self.user
+
+        admin_instance = TestModelAdmin(TestModel, AdminSite())
+        filters = admin_instance.get_list_filter(request)
+
+        assert any(
+            getattr(f, "__name__", "") == "CategoryRelationListFilter" for f in filters
+        )
+
+    def test_category_list_filter_filters_by_category_and_none(self) -> None:
+        from tests.test_app.admin import TestModelAdmin
+
+        obj_with_cat1 = TestModel.objects.create(title="With cat1")
+        obj_without_cat = TestModel.objects.create(title="Without cat")
+        obj_with_cat2 = TestModel.objects.create(title="With cat2")
+
+        content_type = ContentType.objects.get_for_model(TestModel)
+        CategoryRelation.objects.create(
+            category=self.cat1,
+            content_type=content_type,
+            object_id=obj_with_cat1.pk,
+            order=0,
+        )
+        CategoryRelation.objects.create(
+            category=self.cat2,
+            content_type=content_type,
+            object_id=obj_with_cat2.pk,
+            order=0,
+        )
+
+        admin_instance = TestModelAdmin(TestModel, AdminSite())
+
+        request_cat1 = self.factory.get("/admin/", {"category": str(self.cat1.pk)})
+        request_cat1.user = self.user
+        flt_cat1 = admin_instance.CategoryRelationListFilter(
+            request_cat1,
+            request_cat1.GET.copy(),
+            TestModel,
+            admin_instance,
+        )
+        qs_cat1 = flt_cat1.queryset(request_cat1, TestModel.objects.all())
+        assert list(qs_cat1.order_by("pk").values_list("pk", flat=True)) == [obj_with_cat1.pk]
+
+        request_none = self.factory.get("/admin/", {"category": "__none__"})
+        request_none.user = self.user
+        flt_none = admin_instance.CategoryRelationListFilter(
+            request_none,
+            request_none.GET.copy(),
+            TestModel,
+            admin_instance,
+        )
+        qs_none = flt_none.queryset(request_none, TestModel.objects.all())
+        assert list(qs_none.order_by("pk").values_list("pk", flat=True)) == [obj_without_cat.pk]

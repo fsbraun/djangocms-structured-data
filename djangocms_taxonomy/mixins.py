@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING, Any, Iterable
 
 from django import forms
+from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -192,6 +193,55 @@ class CategoryAdminMixin:
         class MyModelAdmin(CategoryAdminMixin, admin.ModelAdmin):
             list_display = ('title',)
     """
+
+    class CategoryRelationListFilter(admin.SimpleListFilter):
+        title = _("Category")
+        parameter_name = "category"
+
+        def lookups(self, request: Any, model_admin: admin.ModelAdmin):
+            categories = (
+                Category.objects.all()
+                .with_tree_fields()
+                .prefetch_related("translations")
+                .order_by("path")
+            )
+            lookups: list[tuple[str, str]] = [("__none__", str(_("No category")))]
+            lookups.extend(
+                (
+                    str(category.pk),
+                    (
+                        ("— " * int(getattr(category, "depth", 0)))
+                        + (
+                            category.safe_translation_getter("name", any_language=True)
+                            or getattr(category, "slug", None)
+                            or str(category.pk)
+                        )
+                    ),
+                )
+                for category in categories
+            )
+            return lookups
+
+        def queryset(self, request: Any, queryset: QuerySet):
+            value = self.value()
+            if not value:
+                return queryset
+
+            content_type = ContentType.objects.get_for_model(queryset.model)
+            relations = CategoryRelation.objects.filter(content_type=content_type)
+
+            if value == "__none__":
+                related_object_ids = relations.values_list("object_id", flat=True)
+                return queryset.exclude(pk__in=related_object_ids)
+
+            related_object_ids = relations.filter(category_id=value).values_list("object_id", flat=True)
+            return queryset.filter(pk__in=related_object_ids)
+
+    def get_list_filter(self, request: Any):
+        list_filter = list(super().get_list_filter(request))  # type: ignore
+        if self.CategoryRelationListFilter not in list_filter:
+            list_filter.append(self.CategoryRelationListFilter)
+        return list_filter
 
     def get_form(self, request: Any, obj: Model | None = None, **kwargs: Any) -> type[forms.ModelForm]:
         """Get the form class with category support."""
