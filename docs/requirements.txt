@@ -1,2 +1,5 @@
-sphinx
-sphinx-rtd-theme
+Sphinx==7.2.6
+furo==2024.1.29
+myst-parser==2.0.0
+sphinx-autodoc-typehints==1.25.2
+linkify-it-py
