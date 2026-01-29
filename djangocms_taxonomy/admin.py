@@ -64,14 +64,28 @@ class CategoryAdmin(TranslatableAdmin):
 if django_apps.is_installed("taggit"):
     from taggit.models import Tag, TaggedItem
 
+    # If taggit registered its own admin elsewhere, remove it so the proxy
+    # models below show up under the Taxonomy app.
+    try:
+        admin.site.unregister(Tag)
+    except admin.sites.NotRegistered:
+        pass
+
+    try:
+        admin.site.unregister(TaggedItem)
+    except admin.sites.NotRegistered:
+        pass
+
     class TaxonomyTag(Tag):
         class Meta:
             proxy = True
+            verbose_name = _("Tag")
             app_label = "djangocms_taxonomy"
 
     class TaxonomyTaggedItem(TaggedItem):
         class Meta:
             proxy = True
+            verbose_name = _("Tagged item")
             app_label = "djangocms_taxonomy"
 
     @admin.register(TaxonomyTag)
