@@ -6,7 +6,7 @@ Reference documentation for Django CMS Taxonomy models.
 
 The main Category model for managing hierarchical categories.
 
-```{autoclass} djangocms_taxonomy.models.Category
+```{autoclass} djangocms_structured_data.models.Category
 :members:
 :undoc-members:
 ```
@@ -29,7 +29,7 @@ See {doc}`../reference/models` for the complete model API.
 
 Intermediary model for generic many-to-many relationships between categories and other models.
 
-```{autoclass} djangocms_taxonomy.models.CategoryRelation
+```{autoclass} djangocms_structured_data.models.CategoryRelation
 :members:
 :undoc-members:
 ```
@@ -46,7 +46,7 @@ Intermediary model for generic many-to-many relationships between categories and
 
 Custom QuerySet with tree traversal methods.
 
-```{autoclass} djangocms_taxonomy.models.CategoryQuerySet
+```{autoclass} djangocms_structured_data.models.CategoryQuerySet
 :members:
 :undoc-members:
 ```

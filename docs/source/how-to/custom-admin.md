@@ -8,7 +8,7 @@ Create your own admin mixin extending `CategoryAdminMixin`:
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
 class CustomCategoryAdminMixin(CategoryAdminMixin):
@@ -33,7 +33,7 @@ class BlogPostAdmin(CustomCategoryAdminMixin, admin.ModelAdmin):
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
 @admin.register(BlogPost)
@@ -53,8 +53,8 @@ class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
 ```python
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from djangocms_taxonomy import CategoryAdminMixin
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data import CategoryAdminMixin
+from djangocms_structured_data.models import CategoryRelation
 from .models import BlogPost
 
 class CategoryFilter(admin.SimpleListFilter):
@@ -89,7 +89,7 @@ Create a custom widget for category selection:
 ```python
 from django.forms.widgets import CheckboxSelectMultiple
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin, CategoryFormMixin
+from djangocms_structured_data import CategoryAdminMixin, CategoryFormMixin
 from .models import BlogPost
 
 class HierarchicalCategoryWidget(CheckboxSelectMultiple):
@@ -127,7 +127,7 @@ If you want to manage categories as inlines (not recommended, but possible):
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data.models import CategoryRelation
 
 class CategoryInline(admin.TabularInline):
     model = CategoryRelation
@@ -147,8 +147,8 @@ Create a custom mixin that restricts category choices based on permissions:
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
-from djangocms_taxonomy.models import Category
+from djangocms_structured_data import CategoryAdminMixin
+from djangocms_structured_data.models import Category
 from .models import BlogPost
 
 class RestrictedCategoryAdminMixin(CategoryAdminMixin):

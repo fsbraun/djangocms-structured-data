@@ -8,7 +8,7 @@ Learn how to query and filter your models by category.
 
 ```python
 from blog.models import BlogPost
-from djangocms_taxonomy.models import Category, CategoryRelation
+from djangocms_structured_data.models import Category, CategoryRelation
 from django.contrib.contenttypes.models import ContentType
 
 # Get all posts in a specific category
@@ -96,7 +96,7 @@ Create a helper method on your model for convenience:
 # blog/models.py
 
 from django.db import models
-from djangocms_taxonomy import CategoryMixin
+from djangocms_structured_data import CategoryMixin
 
 class BlogPost(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
@@ -105,7 +105,7 @@ class BlogPost(CategoryMixin, models.Model):
     @classmethod
     def by_category(cls, category):
         """Get all posts in a category."""
-        from djangocms_taxonomy.models import CategoryRelation
+        from djangocms_structured_data.models import CategoryRelation
         from django.contrib.contenttypes.models import ContentType
 
         ct = ContentType.objects.get_for_model(cls)

@@ -27,7 +27,7 @@ jobs:
 
     - name: Run tests with pytest
       run: |
-        pytest --cov=djangocms_taxonomy --cov-report=xml
+        pytest --cov=djangocms_structured_data --cov-report=xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

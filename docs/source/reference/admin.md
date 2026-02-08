@@ -6,7 +6,7 @@ Reference documentation for Django CMS Taxonomy admin classes.
 
 Built-in admin for the Category model.
 
-```{autoclass} djangocms_taxonomy.admin.CategoryAdmin
+```{autoclass} djangocms_structured_data.admin.CategoryAdmin
 :members:
 :undoc-members:
 ```
@@ -44,7 +44,7 @@ Use `CategoryAdminMixin` in your admin classes:
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
 @admin.register(BlogPost)

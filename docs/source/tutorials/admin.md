@@ -8,7 +8,7 @@ Use `CategoryAdminMixin` to add category management to your model admin:
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
 @admin.register(BlogPost)
@@ -46,7 +46,7 @@ class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
 @admin.register(BlogPost)
@@ -67,8 +67,8 @@ Django CMS Taxonomy includes a built-in admin for the `Category` model:
 # But you can customize it by creating your own
 
 from django.contrib import admin
-from djangocms_taxonomy.models import Category
-from djangocms_taxonomy.admin import CategoryAdmin
+from djangocms_structured_data.models import Category
+from djangocms_structured_data.admin import CategoryAdmin
 
 # The default CategoryAdmin is already registered,
 # but you can override it if needed
@@ -95,7 +95,7 @@ class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
         # Filter by category if requested
         category_id = request.GET.get('category')
         if category_id:
-            from djangocms_taxonomy.models import CategoryRelation
+            from djangocms_structured_data.models import CategoryRelation
             related = CategoryRelation.objects.filter(
                 category_id=category_id
             ).values_list('object_id', flat=True)

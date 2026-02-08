@@ -22,7 +22,7 @@ except Exception as exc:
     # misconfiguration). Autodoc pages that import Django code may fail.
     print(f"WARNING: Django could not be initialized for autodoc: {exc}")
 
-from djangocms_taxonomy import __version__
+from djangocms_structured_data import __version__
 
 # -- Project information -------------------------------------------------------
 project = "django CMS Taxonomy"

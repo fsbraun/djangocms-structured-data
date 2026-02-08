@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     # Django Parler
     "parler",
     # Local app
-    "djangocms_taxonomy",
+    "djangocms_structured_data",
     "tests.test_app",
 ]
 

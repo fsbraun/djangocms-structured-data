@@ -67,17 +67,17 @@ Repository = "https://github.com/django-cms/djangocms-taxonomy"
 include-package-data = true
 
 [tool.setuptools.dynamic]
-version = {attr = "djangocms_taxonomy.__version__"}
+version = {attr = "djangocms_structured_data.__version__"}
 
 [tool.setuptools.package-data]
-djangocms_taxonomy = [
+djangocms_structured_data = [
     "static/**",
     "templates/**",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["djangocms_taxonomy*"]
+include = ["djangocms_structured_data*"]
 
 [tool.ruff]
 line-length = 119

@@ -34,7 +34,7 @@ Add to your Django settings:
 ```python
 INSTALLED_APPS = [
     # ...
-    "djangocms_taxonomy",
+    "djangocms_structured_data",
 ]
 ```
 

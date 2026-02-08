@@ -12,14 +12,14 @@ pip install djangocms-taxonomy
 
 ## Configuration
 
-Add `djangocms_taxonomy` to your Django `INSTALLED_APPS`:
+Add `djangocms_structured_data` to your Django `INSTALLED_APPS`:
 
 ```python
 INSTALLED_APPS = [
     # ... other apps
     "parler",  # Required for multilingual support
     "django_cte",  # Required for efficient tree queries
-    "djangocms_taxonomy",
+    "djangocms_structured_data",
 ]
 ```
 
@@ -40,7 +40,7 @@ Use `CategoryMixin` to add category support to any Django model:
 
 ```python
 from django.db import models
-from djangocms_taxonomy import CategoryMixin
+from djangocms_structured_data import CategoryMixin
 
 class BlogPost(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
@@ -69,7 +69,7 @@ Add category selection to your model's admin using `CategoryAdminMixin`:
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
 @admin.register(BlogPost)

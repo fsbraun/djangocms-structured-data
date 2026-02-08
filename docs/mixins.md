@@ -8,7 +8,7 @@ Adds a `categories` property to any Django model that provides reverse relation 
 
 ```python
 from django.db import models
-from djangocms_taxonomy import CategoryMixin
+from djangocms_structured_data import CategoryMixin
 
 class Article(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
@@ -41,7 +41,7 @@ names = list(article.categories.values_list("name", flat=True))
 
 ```python
 from django.contrib.contenttypes.models import ContentType
-from djangocms_taxonomy.models import Category, CategoryRelation
+from djangocms_structured_data.models import Category, CategoryRelation
 
 # Get or create a category
 category = Category.objects.create(slug="news")
@@ -70,7 +70,7 @@ Adds category selection to Django admin for any model.
 
 ```python
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from myapp.models import Article
 
 @admin.register(Article)
@@ -91,7 +91,7 @@ For complete integration, use both mixins:
 ```python
 # models.py
 from django.db import models
-from djangocms_taxonomy import CategoryMixin
+from djangocms_structured_data import CategoryMixin
 
 class Article(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
@@ -99,7 +99,7 @@ class Article(CategoryMixin, models.Model):
 
 # admin.py
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import Article
 
 @admin.register(Article)

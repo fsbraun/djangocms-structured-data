@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     "django_cte",
 
     # Django CMS Taxonomy
-    "djangocms_taxonomy",
+    "djangocms_structured_data",
 
     # Your apps
     "blog",
@@ -41,7 +41,7 @@ LANGUAGE_CODE = 'en'
 
 from django.db import models
 from django.urls import reverse
-from djangocms_taxonomy import CategoryMixin
+from djangocms_structured_data import CategoryMixin
 
 class BlogPost(CategoryMixin, models.Model):
     """Blog post with category support."""
@@ -77,7 +77,7 @@ class BlogPost(CategoryMixin, models.Model):
 # blog/admin.py
 
 from django.contrib import admin
-from djangocms_taxonomy import CategoryAdminMixin
+from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
 @admin.register(BlogPost)

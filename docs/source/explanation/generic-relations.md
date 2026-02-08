@@ -57,7 +57,7 @@ class CategoryRelation(models.Model):
 
 ```python
 from django.contrib.contenttypes.models import ContentType
-from djangocms_taxonomy.models import Category, CategoryRelation
+from djangocms_structured_data.models import Category, CategoryRelation
 from blog.models import BlogPost
 
 # Create a category
@@ -155,7 +155,7 @@ ct = ContentType.objects.get(app_label='blog', model='blogpost')
 ```python
 # Find all categories linked to BlogPost objects
 from django.contrib.contenttypes.models import ContentType
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data.models import CategoryRelation
 
 ct = ContentType.objects.get_for_model(BlogPost)
 relations = CategoryRelation.objects.filter(content_type=ct)
@@ -191,7 +191,7 @@ for rel in relations:
 Django CMS Taxonomy provides `CategoryMixin` to avoid these queries:
 
 ```python
-from djangocms_taxonomy import CategoryMixin
+from djangocms_structured_data import CategoryMixin
 
 class BlogPost(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
@@ -230,7 +230,7 @@ If you need custom behavior, you can work with CategoryRelation directly:
 
 ```python
 from django.contrib.contenttypes.models import ContentType
-from djangocms_taxonomy.models import Category, CategoryRelation
+from djangocms_structured_data.models import Category, CategoryRelation
 
 def categorize_object(obj, category_ids):
     """Assign categories to any object."""

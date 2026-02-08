@@ -21,7 +21,7 @@ Update your \`INSTALLED_APPS\` setting:
 ```python
 INSTALLED_APPS = [
     ...
-    "djangocms_taxonomy",
+    "djangocms_structured_data",
     ...
 ]
 ```

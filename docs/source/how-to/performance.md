@@ -10,7 +10,7 @@ When working with multiple objects, prefetch their categories:
 
 ```python
 from django.db.models import Prefetch
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data.models import CategoryRelation
 from blog.models import BlogPost
 
 # Good: One query per object
@@ -47,7 +47,7 @@ posts = BlogPost.objects.defer('content').all()
 Django CMS Taxonomy uses CTEs for efficient tree queries:
 
 ```python
-from djangocms_taxonomy.models import Category
+from djangocms_structured_data.models import Category
 
 # Efficient: Single CTE query to get tree structure
 root = Category.objects.get(slug='programming')
@@ -62,7 +62,7 @@ descendants = root.get_descendants()  # Uses CTE
 ```python
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
-from djangocms_taxonomy.models import Category
+from djangocms_structured_data.models import Category
 
 def get_category_tree():
     """Get category tree with caching."""
@@ -86,7 +86,7 @@ def category_list(request):
 ```python
 from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data.models import CategoryRelation
 from blog.models import BlogPost
 
 def get_posts_by_category(category_id):
@@ -121,7 +121,7 @@ form.save()  # Uses bulk_create internally
 If you need to create relations manually:
 
 ```python
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data.models import CategoryRelation
 from django.contrib.contenttypes.models import ContentType
 from blog.models import BlogPost
 
@@ -168,7 +168,7 @@ for post in posts:
 
 ```python
 from django.contrib.contenttypes.models import ContentType
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data.models import CategoryRelation
 from blog.models import BlogPost
 
 # Efficient deletion

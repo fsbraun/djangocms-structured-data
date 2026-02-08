@@ -8,7 +8,7 @@ Import and add `CategoryMixin` to your model:
 
 ```python
 from django.db import models
-from djangocms_taxonomy import CategoryMixin
+from djangocms_structured_data import CategoryMixin
 
 class Article(CategoryMixin, models.Model):
     title = models.CharField(max_length=255)
@@ -73,7 +73,7 @@ Categories are saved in `CategoryRelation` with an `order` field. The order is p
 ordered_cats = article.categories.all()
 
 # Access the order through the relation
-from djangocms_taxonomy.models import CategoryRelation
+from djangocms_structured_data.models import CategoryRelation
 relations = CategoryRelation.objects.filter(
     content_type=ContentType.objects.get_for_model(Article),
     object_id=article.id
@@ -100,7 +100,7 @@ blog = BlogPost.objects.create(title="Django Tips")
 news = NewsArticle.objects.create(title="Django 5.0 Released", source="Official")
 
 # They use the same Category objects through different relations
-from djangocms_taxonomy.models import Category
+from djangocms_structured_data.models import Category
 cat = Category.objects.create(name="Django")
 
 CategoryRelation.objects.create(

@@ -11,7 +11,7 @@ Ensure django-parler is installed and configured:
 
 INSTALLED_APPS = [
     'parler',
-    'djangocms_taxonomy',
+    'djangocms_structured_data',
 ]
 
 LANGUAGES = [
@@ -38,7 +38,7 @@ PARLER_LANGUAGES = {
 ### In Python Code
 
 ```python
-from djangocms_taxonomy.models import Category
+from djangocms_structured_data.models import Category
 
 # Create a category with English name
 category = Category.objects.create(
@@ -136,7 +136,7 @@ categories = Category.objects.language('de').filter(name='Python')
 from django.views.generic import DetailView
 from django.utils.translation import activate
 from parler.utils.context import switch_language
-from djangocms_taxonomy.models import Category
+from djangocms_structured_data.models import Category
 
 class CategoryDetailView(DetailView):
     model = Category
