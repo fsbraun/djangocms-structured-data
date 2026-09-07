@@ -47,6 +47,7 @@ from django.contrib import admin
 from djangocms_structured_data import CategoryAdminMixin
 from .models import BlogPost
 
+
 @admin.register(BlogPost)
 class BlogPostAdmin(CategoryAdminMixin, admin.ModelAdmin):
     pass

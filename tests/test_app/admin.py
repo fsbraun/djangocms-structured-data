@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from djangocms_structured_data.mixins import CategoryAdminMixin
 
 from .models import TestModel
